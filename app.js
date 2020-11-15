@@ -17,7 +17,7 @@ const db = require("./models");
 db.sequelize
   .sync({ force: true })
   .then(() => {
-    console.log("Connection to db succesfull..");
+    console.log("Connection to db succesfull...");
   })
   .catch((err) => {
     console.log(err);
