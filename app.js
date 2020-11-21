@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const db = require("./models");
 db.sequelize
-  .sync({ force: true })
+  .sync(/* { force: true } */)
   .then(() => {
     console.log("Connection to db succesfull...");
   })
@@ -29,6 +29,7 @@ app.get("/", (req, res) => {
 
 // routes
 require("./routes/auth.routes")(app);
+require("./routes/user.routes")(app);
 
 const port = process.env.PORT || 8081;
 
