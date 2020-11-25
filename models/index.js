@@ -20,5 +20,18 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.user = require("../models/user.model")(sequelize, Sequelize);
+db.skill = require("../models/skill.model")(sequelize, Sequelize);
+
+db.user.belongsToMany(db.skill, {
+  through: "user_skills",
+  as: "skills",
+  foreignKey: "user_id",
+});
+
+db.skill.belongsToMany(db.user, {
+  through: "user_skills",
+  as: "users",
+  foreignKey: "skill_id",
+});
 
 module.exports = db;
