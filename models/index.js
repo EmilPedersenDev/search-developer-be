@@ -21,17 +21,52 @@ db.sequelize = sequelize;
 
 db.user = require("../models/user.model")(sequelize, Sequelize);
 db.skill = require("../models/skill.model")(sequelize, Sequelize);
+db.project = require("../models/project.model")(sequelize, Sequelize);
+db.experience = require("../models/experience.model")(sequelize, Sequelize);
+db.socialLink = require("../models/socialLink.model")(sequelize, Sequelize);
+
+// Targets
 
 db.user.belongsToMany(db.skill, {
   through: "user_skills",
   as: "skills",
-  foreignKey: "user_id",
+  foreignKey: "userId",
+});
+
+db.user.hasMany(db.project, {
+  as: "projects",
+});
+
+db.user.hasMany(db.experience, {
+  as: "experience",
+});
+
+db.user.hasOne(db.socialLink, {
+  as: "socialLink",
+  foreignKey: "userId",
+});
+
+// Associations
+
+db.socialLink.belongsTo(db.user, {
+  as: "users",
+  foreignKey: "userId",
+});
+
+db.experience.belongsTo(db.user, {
+  as: "users",
+  foreignKey: "userId",
+});
+
+db.project.belongsTo(db.user, {
+  as: "users",
+  foreignKey: "userId",
 });
 
 db.skill.belongsToMany(db.user, {
   through: "user_skills",
   as: "users",
-  foreignKey: "skill_id",
+  foreignKey: "skillId",
 });
 
 module.exports = db;
