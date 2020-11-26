@@ -2,7 +2,9 @@
 const db = require("../models");
 const User = db.user;
 const Skill = db.skill;
+const Op = db.Sequelize.Op;
 const { addSkill } = require("../controllers/skill.controller");
+const { Sequelize } = require("../models");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -13,38 +15,39 @@ module.exports = function (app) {
     next();
   });
 
-  app.get("/api/users", (req, res) => {
-    User.findAll({
-      include: [
-        {
-          model: Skill,
-          as: "skills",
-        },
-      ],
-    })
-      .then((users) => {
-        if (!users) {
-          return res.status(404).send({
-            message: "User not found",
-          });
-        }
-        return res.status(200).send({
-          users,
-        });
-      })
-      .catch((err) => {
-        return res.status(500).send({
-          message: err,
-        });
-      });
-  });
+  // app.get("/api/users", (req, res) => {
+  //   User.findAll({
+  //     attributes: { exclude: ["password"] },
+  //     include: [
+  //       {
+  //         model: Skill,
+  //         as: "skills",
+  //       },
+  //     ],
+  //   })
+  //     .then((users) => {
+  //       if (!users) {
+  //         return res.status(404).send({
+  //           message: "User not found",
+  //         });
+  //       }
+  //       return res.status(200).send({
+  //         users,
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       return res.status(500).send({
+  //         message: err,
+  //       });
+  //     });
+  // });
 
   app.get("/api/user/:id", (req, res) => {
     User.findByPk(req.params.id, {
       include: [
         {
           model: Skill,
-          as: "skills",
+          as: "Skills",
         },
       ],
     })
@@ -59,12 +62,67 @@ module.exports = function (app) {
           firstname: user.firstname,
           lastname: user.lastname,
           email: user.email,
-          skills: user.skills,
+          skills: user.Skills,
         });
       })
       .catch((err) => {
         return res.status(500).send({
           message: err.message,
+        });
+      });
+  });
+
+  app.get("/api/users", (req, res) => {
+    User.findAll({
+      limit: 10,
+      subQuery: false,
+      where: {
+        [Op.or]: [
+          db.Sequelize.where(
+            Sequelize.fn(
+              "concat",
+              Sequelize.col("firstname"),
+              " ",
+              Sequelize.col("lastname")
+            ),
+            {
+              [Op.like]: "%" + req.query.query + "%",
+            }
+          ),
+          {
+            "$skills.name$": {
+              [Op.like]: "%" + req.query.query + "%",
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: Skill,
+          as: "skills",
+          attributes: ["id", "name"],
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+      attributes: { exclude: ["password"] },
+    })
+      .then((users) => {
+        if (users.length < 1) {
+          return res.status(404).send({
+            message: "No users found!",
+          });
+        }
+
+        return res.status(200).send({
+          users,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).send({
+          message: err,
         });
       });
   });
