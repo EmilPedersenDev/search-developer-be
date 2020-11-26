@@ -47,7 +47,7 @@ module.exports = function (app) {
       include: [
         {
           model: Skill,
-          as: "Skills",
+          as: "skills",
         },
       ],
     })
@@ -62,7 +62,8 @@ module.exports = function (app) {
           firstname: user.firstname,
           lastname: user.lastname,
           email: user.email,
-          skills: user.Skills,
+          information: user.information,
+          skills: user.skills,
         });
       })
       .catch((err) => {

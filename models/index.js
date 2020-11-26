@@ -24,7 +24,7 @@ db.skill = require("../models/skill.model")(sequelize, Sequelize);
 
 db.user.belongsToMany(db.skill, {
   through: "user_skills",
-  // as: "skills",
+  as: "skills",
   foreignKey: "user_id",
 });
 
