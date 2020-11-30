@@ -44,10 +44,12 @@ module.exports = function (app) {
 
   app.get("/api/user/:id", (req, res) => {
     User.findByPk(req.params.id, {
+      attributes: { exclude: ["password", "createdAt", "updatedAt"] },
       include: [
         {
           model: Skill,
           as: "skills",
+          attributes: ["id", "name"],
         },
       ],
     })
@@ -58,12 +60,7 @@ module.exports = function (app) {
           });
         }
         res.status(200).send({
-          id: user.id,
-          firstname: user.firstname,
-          lastname: user.lastname,
-          email: user.email,
-          information: user.information,
-          skills: user.skills,
+          user,
         });
       })
       .catch((err) => {
@@ -128,45 +125,82 @@ module.exports = function (app) {
       });
   });
 
-  app.put("/api/user/:id", (req, res) => {
-    User.update(
-      { firstname: req.body.firstname, lastname: req.body.lastname },
-      {
-        where: {
-          id: req.params.id,
+  app.put("/api/user/:id/personal-information", (req, res) => {
+    User.findByPk(req.params.id, {
+      attributes: { exclude: ["password", "createdAt", "updatedAt"] },
+      include: [
+        {
+          model: Skill,
+          as: "skills",
+          attributes: ["id", "name"],
         },
-      }
-    ).then((user) => {
-      if (!user) {
-        return res.status(404).send({
-          message: "User not found!",
-        });
-      }
-      let addSkillPromise = new Promise((res, rej) => {
-        res(addSkill(req.body.skillId, req.body.id));
-      });
+      ],
+    })
+      .then((user) => {
+        user
+          .update({
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            information: req.body.information,
+          })
+          .then((user) => {
+            if (!user) {
+              return res.status(404).send({
+                message: "No user found!",
+              });
+            }
 
-      let updatedUser;
-
-      return addSkillPromise
-        .then((result) => {
-          updatedUser = result;
-
-          if (!updatedUser) {
-            return res.status(403).send({
-              message: "Could not update user",
+            res.status(200).send({
+              user,
             });
-          }
-
-          return res.status(200).send({
-            updatedUser,
           });
-        })
-        .catch((err) => {
-          return res.status(500).send({
-            message: err,
-          });
+      })
+      .catch((e) => {
+        res.status(500).send({
+          message: e,
         });
-    });
+      });
   });
+
+  // app.put("/api/user/:id", (req, res) => {
+  //   User.update(
+  //     { firstname: req.body.firstname, lastname: req.body.lastname },
+  //     {
+  //       where: {
+  //         id: req.params.id,
+  //       },
+  //     }
+  //   ).then((user) => {
+  //     if (!user) {
+  //       return res.status(404).send({
+  //         message: "User not found!",
+  //       });
+  //     }
+  //     let addSkillPromise = new Promise((res, rej) => {
+  //       res(addSkill(req.body.skillId, req.body.id));
+  //     });
+
+  //     let updatedUser;
+
+  //     return addSkillPromise
+  //       .then((result) => {
+  //         updatedUser = result;
+
+  //         if (!updatedUser) {
+  //           return res.status(403).send({
+  //             message: "Could not update user",
+  //           });
+  //         }
+
+  //         return res.status(200).send({
+  //           updatedUser,
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         return res.status(500).send({
+  //           message: err,
+  //         });
+  //       });
+  //   });
+  // });
 };
