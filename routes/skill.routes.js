@@ -1,5 +1,6 @@
 const db = require("../models");
 const Skill = db.skill;
+const Op = db.Sequelize.Op;
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -20,5 +21,31 @@ module.exports = function (app) {
     return res.status(200).send({
       skills,
     });
+  });
+
+  app.get("/api/skills/search", (req, res) => {
+    Skill.findAll({
+      limit: 10,
+      attributes: { exclude: ["createdAt", "updatedAt"] },
+      where: {
+        name: { [Op.like]: "%" + req.query.query + "%" },
+      },
+    })
+      .then((skill) => {
+        if (!skill) {
+          res.status(404).send({
+            message: "Skill not found!",
+          });
+        }
+
+        res.status(200).send({
+          skill,
+        });
+      })
+      .catch((e) => {
+        res.status(500).send({
+          e,
+        });
+      });
   });
 };
