@@ -2,6 +2,7 @@
 const db = require("../models");
 const User = db.user;
 const Skill = db.skill;
+const SocialLink = db.socialLink;
 const Op = db.Sequelize.Op;
 const { addSkill } = require("../controllers/skill.controller");
 const { Sequelize } = require("../models");
@@ -50,6 +51,11 @@ module.exports = function (app) {
           model: Skill,
           as: "skills",
           attributes: ["id", "name"],
+        },
+        {
+          model: SocialLink,
+          as: "socialLink",
+          attributes: ["id", "github", "linkedIn"],
         },
       ],
     })

@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
     date: {
       type: Sequelize.DATE,
     },
-    desription: {
+    description: {
       type: Sequelize.STRING,
     },
   });
