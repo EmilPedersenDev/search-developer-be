@@ -2,6 +2,12 @@
 const db = require("../models");
 const { addSkill, removeSkill } = require("../controllers/skill.controller");
 const {
+  validate,
+  developerEditValidation,
+  experienceEditValidation,
+  projectEditvalidation,
+} = require("../middleware/");
+const {
   updateSocialLink,
   createSocialLink,
 } = require("../controllers/socialLink.controller");
@@ -95,125 +101,130 @@ module.exports = function (app) {
       });
   });
 
-  app.put("/api/developer/:id", async (req, res) => {
-    const { firstname, lastname, information, socialLink, id } = req.body;
+  app.put(
+    "/api/developer/:id",
+    developerEditValidation(),
+    validate,
+    (req, res) => {
+      const { firstname, lastname, information, socialLink, id } = req.body;
 
-    getUserWithLinks(id).then((user) => {
-      if (!user) {
-        notFoundHandler("User not found!");
-      }
+      getUserWithLinks(id).then((user) => {
+        if (!user) {
+          notFoundHandler("User not found!");
+        }
 
-      let promises = [];
+        let promises = [];
 
-      promises.push(
-        updateUser(
-          {
-            firstname: firstname,
-            lastname: lastname,
-            information: information,
-          },
-          user.id
-        )
-      );
-
-      if (!user.socialLink && Object.keys(socialLink).length !== 0) {
         promises.push(
-          createSocialLink({
-            github: socialLink.github,
-            linkedIn: socialLink.linkedIn,
-            userId: user.id,
-          })
-        );
-      }
-
-      if (user.socialLink && Object.keys(socialLink).length !== 0) {
-        promises.push(
-          updateSocialLink(
+          updateUser(
             {
-              github: socialLink.github,
-              linkedIn: socialLink.linkedIn,
+              firstname: firstname,
+              lastname: lastname,
+              information: information,
             },
             user.id
           )
         );
-      }
 
-      Promise.all(promises)
-        .then(() => {
-          getUserWithLinks(user.id)
-            .then((updatedDeveloper) => {
-              if (!updatedDeveloper) {
-                notFoundHandler("UpdatedUser not found!");
-              }
-
-              res.status(200).send({
-                updatedDeveloper,
-              });
+        if (!user.socialLink && Object.keys(socialLink).length !== 0) {
+          promises.push(
+            createSocialLink({
+              github: socialLink.github,
+              linkedIn: socialLink.linkedIn,
+              userId: user.id,
             })
-            .catch(errorHandler);
-        })
-        .catch(errorHandler);
-    });
+          );
+        }
 
-    // await User.update(
-    //   {
-    //     firstname: firstname,
-    //     lastname: lastname,
-    //     information: information,
-    //   },
-    //   {
-    //     where: {
-    //       id: user.id,
-    //     },
-    //   }
-    // ).catch(errorHandler);
+        if (user.socialLink && Object.keys(socialLink).length !== 0) {
+          promises.push(
+            updateSocialLink(
+              {
+                github: socialLink.github,
+                linkedIn: socialLink.linkedIn,
+              },
+              user.id
+            )
+          );
+        }
 
-    // User.findByPk(req.params.id, {
-    //   attributes: { exclude: ["password", "createdAt", "updatedAt"] },
-    //   include: [
-    //     {
-    //       model: Skill,
-    //       as: "skills",
-    //       attributes: ["id", "name"],
-    //     },
-    //   ],
-    // })
-    //   .then((user) => {
-    //     user
-    //       .update({
-    //         firstname: req.body.firstname,
-    //         lastname: req.body.lastname,
-    //         information: req.body.information,
-    //       })
-    //       .then((updatedUser) => {
-    //         if (!updatedUser) {
-    //           return res.status(404).send({
-    //             message: "No user found!",
-    //           });
-    //         }
-    //         // await removeSkill(user.id);
+        Promise.all(promises)
+          .then(() => {
+            getUserWithLinks(user.id)
+              .then((updatedDeveloper) => {
+                if (!updatedDeveloper) {
+                  notFoundHandler("UpdatedUser not found!");
+                }
 
-    //         let reqSkills = req.body.skills;
+                res.status(200).send({
+                  updatedDeveloper,
+                });
+              })
+              .catch(errorHandler);
+          })
+          .catch(errorHandler);
+      });
 
-    //         let promises = [];
-    //         promises.push(removeSkill(user.id));
-    //         promises.push(addSkill(reqSkills, user.id));
+      // await User.update(
+      //   {
+      //     firstname: firstname,
+      //     lastname: lastname,
+      //     information: information,
+      //   },
+      //   {
+      //     where: {
+      //       id: user.id,
+      //     },
+      //   }
+      // ).catch(errorHandler);
 
-    //         Promise.all(promises).then((result) => {
-    //           let updatedUserHej = updatedUser;
-    //           console.log(result, updatedUserHej);
-    //           res.status(200).send({
-    //             user,
-    //           });
-    //         });
-    //       });
-    //   })
-    //   .catch((e) => {
-    //     res.status(500).send({
-    //       message: e,
-    //     });
-    //   });
-  });
+      // User.findByPk(req.params.id, {
+      //   attributes: { exclude: ["password", "createdAt", "updatedAt"] },
+      //   include: [
+      //     {
+      //       model: Skill,
+      //       as: "skills",
+      //       attributes: ["id", "name"],
+      //     },
+      //   ],
+      // })
+      //   .then((user) => {
+      //     user
+      //       .update({
+      //         firstname: req.body.firstname,
+      //         lastname: req.body.lastname,
+      //         information: req.body.information,
+      //       })
+      //       .then((updatedUser) => {
+      //         if (!updatedUser) {
+      //           return res.status(404).send({
+      //             message: "No user found!",
+      //           });
+      //         }
+      //         // await removeSkill(user.id);
+
+      //         let reqSkills = req.body.skills;
+
+      //         let promises = [];
+      //         promises.push(removeSkill(user.id));
+      //         promises.push(addSkill(reqSkills, user.id));
+
+      //         Promise.all(promises).then((result) => {
+      //           let updatedUserHej = updatedUser;
+      //           console.log(result, updatedUserHej);
+      //           res.status(200).send({
+      //             user,
+      //           });
+      //         });
+      //       });
+      //   })
+      //   .catch((e) => {
+      //     res.status(500).send({
+      //       message: e,
+      //     });
+      //   });
+    }
+  );
 
   app.post(`/api/developer/:id/skills`, (req, res) => {
     const { id } = req.params;
@@ -239,49 +250,54 @@ module.exports = function (app) {
     });
   });
 
-  app.post(`/api/developer/:id/experience`, (req, res) => {
-    const { id } = req.params;
-    const { company, title, date, description } = req.body;
+  app.post(
+    `/api/developer/:id/experience`,
+    experienceEditValidation(),
+    validate,
+    (req, res) => {
+      const { id } = req.params;
+      const { company, title, date, description } = req.body;
 
-    getUserWithExperience(id).then((developer) => {
-      if (!developer) {
-        res.status(404).send({
-          message: "Developer not found",
-        });
-      }
+      getUserWithExperience(id).then((developer) => {
+        if (!developer) {
+          res.status(404).send({
+            message: "Developer not found",
+          });
+        }
 
-      let promises = [];
+        let promises = [];
 
-      promises.push(
-        creatExperience({
-          company: company,
-          title: title,
-          date: date,
-          description: description,
-          userId: developer.id,
-        })
-      );
+        promises.push(
+          creatExperience({
+            company: company,
+            title: title,
+            date: date,
+            description: description,
+            userId: developer.id,
+          })
+        );
 
-      Promise.all(promises)
-        .then(() => {
-          getUserWithExperience(id)
-            .then((updatedDeveloper) => {
-              if (!updatedDeveloper) {
-                notFoundHandler("Developer not found!");
-              }
-              res.status(200).send({
-                updatedDeveloper,
+        Promise.all(promises)
+          .then(() => {
+            getUserWithExperience(id)
+              .then((updatedDeveloper) => {
+                if (!updatedDeveloper) {
+                  notFoundHandler("Developer not found!");
+                }
+                res.status(200).send({
+                  updatedDeveloper,
+                });
+              })
+              .catch((err) => {
+                errorHandler(err);
               });
-            })
-            .catch((err) => {
-              errorHandler(err);
-            });
-        })
-        .catch((err) => {
-          errorHandler(err);
-        });
-    });
-  });
+          })
+          .catch((err) => {
+            errorHandler(err);
+          });
+      });
+    }
+  );
 
   app.delete(`/api/developer/:userId/experience/:id`, (req, res) => {
     const { userId, id } = req.params;
@@ -303,24 +319,29 @@ module.exports = function (app) {
       });
   });
 
-  app.post(`/api/developer/:id/project`, (req, res) => {
-    const { id } = req.params;
-    const { name, link, repoLink, description } = req.body;
+  app.post(
+    `/api/developer/:id/project`,
+    projectEditvalidation(),
+    validate,
+    (req, res) => {
+      const { id } = req.params;
+      const { name, link, repoLink, description } = req.body;
 
-    createProject({
-      name: name,
-      link: link,
-      repoLink: repoLink,
-      description: description,
-      userId: id,
-    }).then(() => {
-      getProject(id).then((project) => {
-        res.status(200).send({
-          project,
+      createProject({
+        name: name,
+        link: link,
+        repoLink: repoLink,
+        description: description,
+        userId: id,
+      }).then(() => {
+        getProject(id).then((project) => {
+          res.status(200).send({
+            project,
+          });
         });
       });
-    });
-  });
+    }
+  );
 
   app.delete(`/api/developer/:userId/project/:id`, (req, res) => {
     const { userId, id } = req.params;
