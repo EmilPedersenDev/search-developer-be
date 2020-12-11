@@ -1,6 +1,7 @@
 const db = require("../models");
 const Skill = db.skill;
 const Op = db.Sequelize.Op;
+const { validate, skillsValidation } = require("../middleware/");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -23,7 +24,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get("/api/skills/search", (req, res) => {
+  app.get("/api/skills/search", skillsValidation(), validate, (req, res) => {
     Skill.findAll({
       limit: 10,
       attributes: { exclude: ["createdAt", "updatedAt"] },
