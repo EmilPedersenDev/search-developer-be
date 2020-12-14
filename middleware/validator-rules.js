@@ -36,9 +36,10 @@ const developerEditValidation = () => {
       .trim()
       .withMessage("Lastname cannot be empty"),
     body("information")
-      .optional({ checkFalsy: true })
-      .isAlpha()
-      .withMessage("Field can only contain letters"),
+      .not()
+      .isEmpty()
+      .trim()
+      .withMessage("Information cannot be empty"),
     body("socialLink.github")
       .optional({ checkFalsy: true })
       .isAlpha()
@@ -71,14 +72,14 @@ const projectEditvalidation = () => {
     body("name").not().isEmpty().trim().withMessage("Name cannot be empty"),
     body("link").not().isEmpty().trim().withMessage("Link cannot be empty"),
     body("repoLink")
+      .optional({ checkFalsy: true })
+      .isAlpha()
+      .withMessage("RepoLink can only contain letters"),
+    body("description")
       .not()
       .isEmpty()
       .trim()
-      .withMessage("RepoLink cannot be empty"),
-    body("description")
-      .optional({ checkFalsy: true })
-      .isAlpha()
-      .withMessage("Description can only contain letters"),
+      .withMessage("Description cannot be empty"),
   ];
 };
 

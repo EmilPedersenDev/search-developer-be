@@ -6,6 +6,7 @@ const {
   developerEditValidation,
   experienceEditValidation,
   projectEditvalidation,
+  authJwt,
 } = require("../middleware/");
 const {
   updateSocialLink,
@@ -105,6 +106,7 @@ module.exports = function (app) {
     "/api/developer/:id",
     developerEditValidation(),
     validate,
+    [authJwt.verifyToken],
     (req, res) => {
       const { firstname, lastname, information, socialLink, id } = req.body;
 
@@ -226,7 +228,7 @@ module.exports = function (app) {
     }
   );
 
-  app.post(`/api/developer/:id/skills`, (req, res) => {
+  app.post(`/api/developer/:id/skills`, [authJwt.verifyToken], (req, res) => {
     const { id } = req.params;
     let reqSkills = req.body;
 
@@ -254,6 +256,7 @@ module.exports = function (app) {
     `/api/developer/:id/experience`,
     experienceEditValidation(),
     validate,
+    [authJwt.verifyToken],
     (req, res) => {
       const { id } = req.params;
       const { company, title, date, description } = req.body;
@@ -299,30 +302,35 @@ module.exports = function (app) {
     }
   );
 
-  app.delete(`/api/developer/:userId/experience/:id`, (req, res) => {
-    const { userId, id } = req.params;
+  app.delete(
+    `/api/developer/:userId/experience/:id`,
+    [authJwt.verifyToken],
+    (req, res) => {
+      const { userId, id } = req.params;
 
-    deleteExperience(userId, id)
-      .then(() => {
-        getExperience(userId)
-          .then((updatedExperience) => {
-            res.status(200).send({
-              updatedExperience,
+      deleteExperience(userId, id)
+        .then(() => {
+          getExperience(userId)
+            .then((updatedExperience) => {
+              res.status(200).send({
+                updatedExperience,
+              });
+            })
+            .catch((err) => {
+              errorHandler(err);
             });
-          })
-          .catch((err) => {
-            errorHandler(err);
-          });
-      })
-      .catch((err) => {
-        errorHandler(err);
-      });
-  });
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
+    }
+  );
 
   app.post(
     `/api/developer/:id/project`,
     projectEditvalidation(),
     validate,
+    [authJwt.verifyToken],
     (req, res) => {
       const { id } = req.params;
       const { name, link, repoLink, description } = req.body;
@@ -343,23 +351,27 @@ module.exports = function (app) {
     }
   );
 
-  app.delete(`/api/developer/:userId/project/:id`, (req, res) => {
-    const { userId, id } = req.params;
+  app.delete(
+    `/api/developer/:userId/project/:id`,
+    [authJwt.verifyToken],
+    (req, res) => {
+      const { userId, id } = req.params;
 
-    deleteProject(userId, id)
-      .then(() => {
-        getProject(userId)
-          .then((project) => {
-            res.status(200).send({
-              project,
+      deleteProject(userId, id)
+        .then(() => {
+          getProject(userId)
+            .then((project) => {
+              res.status(200).send({
+                project,
+              });
+            })
+            .catch((err) => {
+              errorHandler(err);
             });
-          })
-          .catch((err) => {
-            errorHandler(err);
-          });
-      })
-      .catch((err) => {
-        errorHandler(err);
-      });
-  });
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
+    }
+  );
 };
