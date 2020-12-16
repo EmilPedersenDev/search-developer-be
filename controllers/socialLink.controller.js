@@ -9,12 +9,18 @@ exports.addSocialLink = (user) => {
   });
 };
 
-exports.updateSocialLink = async (userRequest, userId) => {
-  return SocialLink.update(userRequest, {
-    where: {
-      userId: userId,
+exports.updateSocialLink = async (userBody, userId) => {
+  return SocialLink.update(
+    {
+      github: userBody.socialLink.github,
+      linkedIn: userBody.socialLink.linkedIn,
     },
-  })
+    {
+      where: {
+        userId: userId,
+      },
+    }
+  )
     .then((links) => {
       return links;
     })
@@ -23,8 +29,12 @@ exports.updateSocialLink = async (userRequest, userId) => {
     });
 };
 
-exports.createSocialLink = async (userRequest) => {
-  return SocialLink.create(userRequest)
+exports.createSocialLink = async (userBody, userId) => {
+  return SocialLink.create({
+    github: userBody.socialLink.github,
+    linkedIn: userBody.socialLink.linkedIn,
+    userId: userId,
+  })
     .then((result) => {
       return result;
     })

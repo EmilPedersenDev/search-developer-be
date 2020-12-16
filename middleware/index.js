@@ -9,6 +9,7 @@ const {
   experienceEditValidation,
   projectEditvalidation,
 } = require("./validator-rules");
+const uploadFile = require("./upload");
 
 module.exports = {
   authJwt,
@@ -20,4 +21,5 @@ module.exports = {
   skillsValidation,
   experienceEditValidation,
   projectEditvalidation,
+  uploadFile,
 };

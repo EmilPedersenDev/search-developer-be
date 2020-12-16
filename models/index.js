@@ -24,6 +24,7 @@ db.skill = require("../models/skill.model")(sequelize, Sequelize);
 db.project = require("../models/project.model")(sequelize, Sequelize);
 db.experience = require("../models/experience.model")(sequelize, Sequelize);
 db.socialLink = require("../models/socialLink.model")(sequelize, Sequelize);
+db.profileImage = require("../models/profileImage.model")(sequelize, Sequelize);
 
 // Targets
 
@@ -43,6 +44,11 @@ db.user.hasMany(db.experience, {
 
 db.user.hasOne(db.socialLink, {
   as: "socialLink",
+  foreignKey: "userId",
+});
+
+db.user.hasOne(db.profileImage, {
+  as: "profileImage",
   foreignKey: "userId",
 });
 
@@ -67,6 +73,11 @@ db.skill.belongsToMany(db.user, {
   through: "user_skills",
   as: "users",
   foreignKey: "skillId",
+});
+
+db.profileImage.belongsTo(db.user, {
+  as: "users",
+  foreignKey: "userId",
 });
 
 module.exports = db;

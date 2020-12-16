@@ -15,8 +15,14 @@ exports.updateExperience = async (experienceRequest, userId) => {
     });
 };
 
-exports.creatExperience = async (experienceRequest) => {
-  return Experience.create(experienceRequest)
+exports.creatExperience = async (experienceBody, userId) => {
+  return Experience.create({
+    company: experienceBody.company,
+    title: experienceBody.title,
+    date: experienceBody.date,
+    description: experienceBody.description,
+    userId: userId,
+  })
     .then((result) => {
       return result;
     })
@@ -35,7 +41,7 @@ exports.deleteExperience = async (userId, id) => {
     return err;
   });
 };
-exports.getExperience = async (userId) => {
+exports.getExperiences = async (userId) => {
   return Experience.findAll({
     where: {
       userId: userId,

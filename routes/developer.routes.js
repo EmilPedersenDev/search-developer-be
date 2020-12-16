@@ -1,12 +1,14 @@
 // const { verifySignup } = require("../middleware");
 const db = require("../models");
-const { addSkill, removeSkill } = require("../controllers/skill.controller");
+const fs = require("fs");
+const { addSkill } = require("../controllers/skill.controller");
 const {
   validate,
   developerEditValidation,
   experienceEditValidation,
   projectEditvalidation,
   authJwt,
+  uploadFile,
 } = require("../middleware/");
 const {
   updateSocialLink,
@@ -16,13 +18,11 @@ const {
   updateUser,
   getUserWithLinks,
   getUserWithSkills,
-  getUserWithExperience,
 } = require("../controllers/user.controller");
 const {
   creatExperience,
   deleteExperience,
-  getExperience,
-  updateExperience,
+  getExperiences,
 } = require("../controllers/experience.controller");
 
 const {
@@ -30,6 +30,11 @@ const {
   deleteProject,
   getProject,
 } = require("../controllers/project.controller");
+const {
+  createProfileImage,
+  getProfileImage,
+  updateProfileImage,
+} = require("../controllers/profileImage.controller");
 
 const notFoundHandler = (err) => {
   res.status(404).send({
@@ -48,7 +53,6 @@ const Skill = db.skill;
 const SocialLink = db.socialLink;
 const Project = db.project;
 const Experience = db.experience;
-const UserSkills = db.sequelize.models.user_skills;
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -87,18 +91,14 @@ module.exports = function (app) {
     })
       .then((developer) => {
         if (!developer) {
-          return res.status(404).send({
-            message: "Developer not found",
-          });
+          notFoundHandler("Developer not found");
         }
         res.status(200).send({
           developer,
         });
       })
       .catch((err) => {
-        return res.status(500).send({
-          message: err.message,
-        });
+        errorHandler(err);
       });
   });
 
@@ -108,8 +108,7 @@ module.exports = function (app) {
     validate,
     [authJwt.verifyToken],
     (req, res) => {
-      const { firstname, lastname, information, socialLink, id } = req.body;
-
+      const { id } = req.params;
       getUserWithLinks(id).then((user) => {
         if (!user) {
           notFoundHandler("User not found!");
@@ -117,37 +116,14 @@ module.exports = function (app) {
 
         let promises = [];
 
-        promises.push(
-          updateUser(
-            {
-              firstname: firstname,
-              lastname: lastname,
-              information: information,
-            },
-            user.id
-          )
-        );
+        promises.push(updateUser(req.body, user.id));
 
-        if (!user.socialLink && Object.keys(socialLink).length !== 0) {
-          promises.push(
-            createSocialLink({
-              github: socialLink.github,
-              linkedIn: socialLink.linkedIn,
-              userId: user.id,
-            })
-          );
+        if (!user.socialLink && Object.keys(req.body.socialLink).length !== 0) {
+          promises.push(createSocialLink(req.body, user.id));
         }
 
-        if (user.socialLink && Object.keys(socialLink).length !== 0) {
-          promises.push(
-            updateSocialLink(
-              {
-                github: socialLink.github,
-                linkedIn: socialLink.linkedIn,
-              },
-              user.id
-            )
-          );
+        if (user.socialLink && Object.keys(req.body.socialLink).length !== 0) {
+          promises.push(updateSocialLink(req.body, user.id));
         }
 
         Promise.all(promises)
@@ -166,90 +142,27 @@ module.exports = function (app) {
           })
           .catch(errorHandler);
       });
-
-      // await User.update(
-      //   {
-      //     firstname: firstname,
-      //     lastname: lastname,
-      //     information: information,
-      //   },
-      //   {
-      //     where: {
-      //       id: user.id,
-      //     },
-      //   }
-      // ).catch(errorHandler);
-
-      // User.findByPk(req.params.id, {
-      //   attributes: { exclude: ["password", "createdAt", "updatedAt"] },
-      //   include: [
-      //     {
-      //       model: Skill,
-      //       as: "skills",
-      //       attributes: ["id", "name"],
-      //     },
-      //   ],
-      // })
-      //   .then((user) => {
-      //     user
-      //       .update({
-      //         firstname: req.body.firstname,
-      //         lastname: req.body.lastname,
-      //         information: req.body.information,
-      //       })
-      //       .then((updatedUser) => {
-      //         if (!updatedUser) {
-      //           return res.status(404).send({
-      //             message: "No user found!",
-      //           });
-      //         }
-      //         // await removeSkill(user.id);
-
-      //         let reqSkills = req.body.skills;
-
-      //         let promises = [];
-      //         promises.push(removeSkill(user.id));
-      //         promises.push(addSkill(reqSkills, user.id));
-
-      //         Promise.all(promises).then((result) => {
-      //           let updatedUserHej = updatedUser;
-      //           console.log(result, updatedUserHej);
-      //           res.status(200).send({
-      //             user,
-      //           });
-      //         });
-      //       });
-      //   })
-      //   .catch((e) => {
-      //     res.status(500).send({
-      //       message: e,
-      //     });
-      //   });
     }
   );
 
   app.post(`/api/developer/:id/skills`, [authJwt.verifyToken], (req, res) => {
     const { id } = req.params;
-    let reqSkills = req.body;
 
-    addSkill(reqSkills, id).then(() => {
-      getUserWithSkills(id)
-        .then((developer) => {
-          if (!developer) {
-            res.status(404).send({
-              message: "Developer not found",
+    addSkill(req.body, id)
+      .then(() => {
+        getUserWithSkills(id)
+          .then((skills) => {
+            res.status(200).send({
+              skills,
             });
-          }
-          res.status(200).send({
-            developer,
+          })
+          .catch((e) => {
+            errorHandler(e);
           });
-        })
-        .catch((e) => {
-          res.status(500).send({
-            message: e,
-          });
-        });
-    });
+      })
+      .catch((e) => {
+        errorHandler(e);
+      });
   });
 
   app.post(
@@ -259,46 +172,22 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     (req, res) => {
       const { id } = req.params;
-      const { company, title, date, description } = req.body;
 
-      getUserWithExperience(id).then((developer) => {
-        if (!developer) {
-          res.status(404).send({
-            message: "Developer not found",
-          });
-        }
-
-        let promises = [];
-
-        promises.push(
-          creatExperience({
-            company: company,
-            title: title,
-            date: date,
-            description: description,
-            userId: developer.id,
-          })
-        );
-
-        Promise.all(promises)
-          .then(() => {
-            getUserWithExperience(id)
-              .then((updatedDeveloper) => {
-                if (!updatedDeveloper) {
-                  notFoundHandler("Developer not found!");
-                }
-                res.status(200).send({
-                  updatedDeveloper,
-                });
-              })
-              .catch((err) => {
-                errorHandler(err);
+      creatExperience(req.body, id)
+        .then(() => {
+          getExperiences(id)
+            .then((experiences) => {
+              res.status(200).send({
+                experiences,
               });
-          })
-          .catch((err) => {
-            errorHandler(err);
-          });
-      });
+            })
+            .catch((err) => {
+              errorHandler(err);
+            });
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
     }
   );
 
@@ -310,10 +199,10 @@ module.exports = function (app) {
 
       deleteExperience(userId, id)
         .then(() => {
-          getExperience(userId)
-            .then((updatedExperience) => {
+          getExperiences(userId)
+            .then((experiences) => {
               res.status(200).send({
-                updatedExperience,
+                experiences,
               });
             })
             .catch((err) => {
@@ -333,21 +222,22 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     (req, res) => {
       const { id } = req.params;
-      const { name, link, repoLink, description } = req.body;
 
-      createProject({
-        name: name,
-        link: link,
-        repoLink: repoLink,
-        description: description,
-        userId: id,
-      }).then(() => {
-        getProject(id).then((project) => {
-          res.status(200).send({
-            project,
-          });
+      createProject(req.body, id)
+        .then(() => {
+          getProject(id)
+            .then((project) => {
+              res.status(200).send({
+                project,
+              });
+            })
+            .catch((err) => {
+              errorHandler(err);
+            });
+        })
+        .catch((err) => {
+          errorHandler(err);
         });
-      });
     }
   );
 
@@ -368,6 +258,71 @@ module.exports = function (app) {
             .catch((err) => {
               errorHandler(err);
             });
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
+    }
+  );
+
+  app.post(
+    `/api/developer/profile-image/:id`,
+    [authJwt.verifyToken],
+    uploadFile.single("file"),
+    (req, res) => {
+      if (!req.file) {
+        notFoundHandler("Missing image or file");
+      }
+
+      getProfileImage(req.params.id)
+        .then((profileImage) => {
+          let promises = [];
+
+          if (!profileImage && Object.keys(req.file).length !== 0) {
+            promises.push(createProfileImage(req.file, req.params.id));
+          }
+
+          if (profileImage && Object.keys(req.file).length !== 0) {
+            promises.push(updateProfileImage(req.file, req.params.id));
+          }
+
+          Promise.all(promises)
+            .then(() => {
+              getProfileImage(profileImage.userId)
+                .then((file) => {
+                  fs.unlink(req.file.path, () => {
+                    let imageToBase64 = file.data.toString("base64");
+                    res.send({
+                      type: file.type,
+                      image: imageToBase64,
+                    });
+                  });
+                })
+                .catch((err) => {
+                  errorHandler(err);
+                });
+            })
+            .catch((err) => {
+              errorHandler(err);
+            });
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
+    }
+  );
+
+  app.get(
+    `/api/developer/profile-image/:id`,
+    [authJwt.verifyToken],
+    (req, res) => {
+      getProfileImage(req.params.id)
+        .then((image) => {
+          let imageToBase64 = image.data.toString("base64");
+          res.send({
+            type: image.type,
+            image: imageToBase64,
+          });
         })
         .catch((err) => {
           errorHandler(err);
