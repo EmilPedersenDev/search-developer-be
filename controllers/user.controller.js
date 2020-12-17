@@ -2,14 +2,20 @@ const db = require("../models");
 const User = db.user;
 const SocialLink = db.socialLink;
 const Skill = db.skill;
-const Experience = db.experience;
 
-exports.updateUser = (userRequest, userId) => {
-  return User.update(userRequest, {
-    where: {
-      id: userId,
+exports.updateUser = (userBody, userId) => {
+  return User.update(
+    {
+      firstname: userBody.firstname,
+      lastname: userBody.lastname,
+      information: userBody.information,
     },
-  })
+    {
+      where: {
+        id: userId,
+      },
+    }
+  )
     .then((user) => {
       return user;
     })
@@ -47,25 +53,7 @@ exports.getUserWithSkills = (id) => {
     ],
   })
     .then((user) => {
-      return user;
-    })
-    .catch((err) => {
-      return err;
-    });
-};
-
-exports.getUserWithExperience = (id) => {
-  return User.findByPk(id, {
-    include: [
-      {
-        model: Experience,
-        as: "experience",
-        attributes: ["id", "company", "title", "date", "description"],
-      },
-    ],
-  })
-    .then((user) => {
-      return user;
+      return user.skills;
     })
     .catch((err) => {
       return err;

@@ -105,9 +105,6 @@ module.exports = function (app) {
           model: Skill,
           as: "skills",
           attributes: ["id", "name"],
-          through: {
-            attributes: [],
-          },
         },
       ],
       attributes: { exclude: ["password"] },
@@ -167,46 +164,4 @@ module.exports = function (app) {
         });
       });
   });
-
-  // app.put("/api/user/:id", (req, res) => {
-  //   User.update(
-  //     { firstname: req.body.firstname, lastname: req.body.lastname },
-  //     {
-  //       where: {
-  //         id: req.params.id,
-  //       },
-  //     }
-  //   ).then((user) => {
-  //     if (!user) {
-  //       return res.status(404).send({
-  //         message: "User not found!",
-  //       });
-  //     }
-  //     let addSkillPromise = new Promise((res, rej) => {
-  //       res(addSkill(req.body.skillId, req.body.id));
-  //     });
-
-  //     let updatedUser;
-
-  //     return addSkillPromise
-  //       .then((result) => {
-  //         updatedUser = result;
-
-  //         if (!updatedUser) {
-  //           return res.status(403).send({
-  //             message: "Could not update user",
-  //           });
-  //         }
-
-  //         return res.status(200).send({
-  //           updatedUser,
-  //         });
-  //       })
-  //       .catch((err) => {
-  //         return res.status(500).send({
-  //           message: err,
-  //         });
-  //       });
-  //   });
-  // });
 };

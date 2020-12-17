@@ -1,8 +1,28 @@
 const db = require("../models");
 const Project = db.project;
 
-exports.createProject = async (projectRequest) => {
-  return Project.create(projectRequest)
+exports.getProject = async (userId) => {
+  return Project.findAll({
+    where: {
+      userId: userId,
+    },
+  })
+    .then((project) => {
+      return project;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+exports.createProject = async (projectBody, userId) => {
+  return Project.create({
+    name: projectBody.name,
+    link: projectBody.link,
+    repoLink: projectBody.repoLink,
+    description: projectBody.description,
+    userId: userId,
+  })
     .then((result) => {
       return result;
     })
@@ -20,18 +40,4 @@ exports.deleteProject = async (userId, id) => {
   }).catch((err) => {
     return err;
   });
-};
-
-exports.getProject = async (userId) => {
-  return Project.findAll({
-    where: {
-      userId: userId,
-    },
-  })
-    .then((project) => {
-      return project;
-    })
-    .catch((err) => {
-      return err;
-    });
 };

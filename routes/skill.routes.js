@@ -3,6 +3,18 @@ const Skill = db.skill;
 const Op = db.Sequelize.Op;
 const { validate, skillsValidation } = require("../middleware/");
 
+const notFoundHandler = (err) => {
+  res.status(404).send({
+    message: err,
+  });
+};
+
+const errorHandler = (err) => {
+  res.status(500).send({
+    message: err,
+  });
+};
+
 module.exports = function (app) {
   app.use(function (req, res, next) {
     res.header(
@@ -13,15 +25,18 @@ module.exports = function (app) {
   });
 
   app.get("/api/skills", async (req, res) => {
-    const skills = await Skill.findAll();
-    if (!skills) {
-      return res.status(404).send({
-        message: "Could not find any skills!",
+    Skill.findAll()
+      .then((skills) => {
+        if (!skills) {
+          notFoundHandler("Could not find any skills!");
+        }
+        return res.status(200).send({
+          skills,
+        });
+      })
+      .catch((e) => {
+        errorHandler(e);
       });
-    }
-    return res.status(200).send({
-      skills,
-    });
   });
 
   app.get("/api/skills/search", skillsValidation(), validate, (req, res) => {
@@ -32,21 +47,17 @@ module.exports = function (app) {
         name: { [Op.like]: "%" + req.query.query + "%" },
       },
     })
-      .then((skill) => {
-        if (!skill) {
-          res.status(404).send({
-            message: "Skill not found!",
-          });
+      .then((skills) => {
+        if (!skills) {
+          notFoundHandler("Skill not found!");
         }
 
         res.status(200).send({
-          skill,
+          skills,
         });
       })
       .catch((e) => {
-        res.status(500).send({
-          e,
-        });
+        errorHandler(e);
       });
   });
 };
