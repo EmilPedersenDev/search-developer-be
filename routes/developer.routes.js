@@ -38,13 +38,13 @@ const {
   updateProfileImage,
 } = require("../controllers/profileImage.controller");
 
-const notFoundHandler = (err) => {
+const notFoundHandler = (res, err) => {
   res.status(404).send({
     message: err,
   });
 };
 
-const errorHandler = (err) => {
+const errorHandler = (res, err) => {
   res.status(500).send({
     message: err,
   });
@@ -100,14 +100,14 @@ module.exports = function (app) {
     })
       .then((developer) => {
         if (!developer) {
-          notFoundHandler("Developer not found");
+          notFoundHandler(res, "Developer not found");
         }
         res.status(200).send({
           developer,
         });
       })
       .catch((err) => {
-        errorHandler(err);
+        errorHandler(res, err);
       });
   });
 
@@ -120,7 +120,7 @@ module.exports = function (app) {
       const { id } = req.params;
       getUserWithLinks(id).then((user) => {
         if (!user) {
-          notFoundHandler("User not found!");
+          notFoundHandler(res, "User not found!");
         }
 
         let promises = [];
@@ -140,16 +140,20 @@ module.exports = function (app) {
             getUserWithLinks(user.id)
               .then((updatedDeveloper) => {
                 if (!updatedDeveloper) {
-                  notFoundHandler("UpdatedUser not found!");
+                  return notFoundHandler(res, "UpdatedUser not found!");
                 }
 
                 res.status(200).send({
                   updatedDeveloper,
                 });
               })
-              .catch(errorHandler);
+              .catch((err) => {
+                errorHandler(res, err);
+              });
           })
-          .catch(errorHandler);
+          .catch((err) => {
+            errorHandler(res, err);
+          });
       });
     }
   );
@@ -165,12 +169,12 @@ module.exports = function (app) {
               skills,
             });
           })
-          .catch((e) => {
-            errorHandler(e);
+          .catch((err) => {
+            errorHandler(res, err);
           });
       })
-      .catch((e) => {
-        errorHandler(e);
+      .catch((err) => {
+        errorHandler(res, err);
       });
   });
 
@@ -191,11 +195,11 @@ module.exports = function (app) {
               });
             })
             .catch((err) => {
-              errorHandler(err);
+              errorHandler(res, err);
             });
         })
         .catch((err) => {
-          errorHandler(err);
+          errorHandler(res, err);
         });
     }
   );
@@ -213,18 +217,18 @@ module.exports = function (app) {
           getExperiences(id)
             .then((experiences) => {
               if (experiences.length < 1) {
-                notFoundHandler("No experiences found");
+                return notFoundHandler(res, "No experiences found");
               }
               res.status(200).send({
                 experiences,
               });
             })
             .catch((err) => {
-              errorHandler(err);
+              errorHandler(res, err);
             });
         })
         .catch((err) => {
-          errorHandler(err);
+          errorHandler(res, err);
         });
     }
   );
@@ -244,11 +248,11 @@ module.exports = function (app) {
               });
             })
             .catch((err) => {
-              errorHandler(err);
+              errorHandler(res, err);
             });
         })
         .catch((err) => {
-          errorHandler(err);
+          errorHandler(res, err);
         });
     }
   );
@@ -266,18 +270,18 @@ module.exports = function (app) {
           getProject(id)
             .then((project) => {
               if (!project) {
-                notFoundHandler("No Projects found");
+                return notFoundHandler(res, "No Projects found");
               }
               res.status(200).send({
                 project,
               });
             })
             .catch((err) => {
-              errorHandler(err);
+              errorHandler(res, err);
             });
         })
         .catch((err) => {
-          errorHandler(err);
+          errorHandler(res, err);
         });
     }
   );
@@ -295,18 +299,18 @@ module.exports = function (app) {
           getProject(id)
             .then((project) => {
               if (!project) {
-                notFoundHandler("No Projects found");
+                return notFoundHandler(res, "No Projects found");
               }
               res.status(200).send({
                 project,
               });
             })
             .catch((err) => {
-              errorHandler(err);
+              errorHandler(res, err);
             });
         })
         .catch((err) => {
-          errorHandler(err);
+          errorHandler(res, err);
         });
     }
   );
@@ -321,16 +325,19 @@ module.exports = function (app) {
         .then(() => {
           getProject(userId)
             .then((project) => {
+              if (!project) {
+                return notFoundHandler(res, "No Projects found");
+              }
               res.status(200).send({
                 project,
               });
             })
             .catch((err) => {
-              errorHandler(err);
+              errorHandler(res, err);
             });
         })
         .catch((err) => {
-          errorHandler(err);
+          errorHandler(res, err);
         });
     }
   );
@@ -341,7 +348,7 @@ module.exports = function (app) {
     uploadFile.single("file"),
     (req, res) => {
       if (!req.file) {
-        notFoundHandler("Missing image or file");
+        notFoundHandler(res, "Missing image or file");
       }
 
       getProfileImage(req.params.id)
@@ -360,6 +367,9 @@ module.exports = function (app) {
             .then(() => {
               getProfileImage(profileImage.userId)
                 .then((file) => {
+                  if (!file) {
+                    return notFoundHandler(res, "Image not found");
+                  }
                   fs.unlink(req.file.path, () => {
                     let imageToBase64 = file.data.toString("base64");
                     res.send({
@@ -369,37 +379,33 @@ module.exports = function (app) {
                   });
                 })
                 .catch((err) => {
-                  errorHandler(err);
+                  errorHandler(res, err);
                 });
             })
             .catch((err) => {
-              errorHandler(err);
+              errorHandler(res, err);
             });
         })
         .catch((err) => {
-          errorHandler(err);
+          errorHandler(res, err);
         });
     }
   );
 
-  app.get(
-    `/api/developer/profile-image/:id`,
-    [authJwt.verifyToken],
-    (req, res) => {
-      getProfileImage(req.params.id)
-        .then((image) => {
-          if (!image) {
-            notFoundHandler("Image not found");
-          }
-          let imageToBase64 = image.data.toString("base64");
-          res.send({
-            type: image.type,
-            image: imageToBase64,
-          });
-        })
-        .catch((err) => {
-          errorHandler(err);
+  app.get(`/api/developer/profile-image/:id`, (req, res) => {
+    getProfileImage(req.params.id)
+      .then((image) => {
+        if (!image) {
+          return notFoundHandler(res, "Image not found");
+        }
+        let imageToBase64 = image.data.toString("base64");
+        res.send({
+          type: image.type,
+          image: imageToBase64,
         });
-    }
-  );
+      })
+      .catch((err) => {
+        errorHandler(res, err);
+      });
+  });
 };
