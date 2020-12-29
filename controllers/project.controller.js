@@ -6,13 +6,9 @@ exports.getProject = (userId) => {
     where: {
       userId: userId,
     },
-  })
-    .then((project) => {
-      return project;
-    })
-    .catch((err) => {
-      return err;
-    });
+  }).then((project) => {
+    return project;
+  });
 };
 
 exports.createProject = (projectBody, userId) => {
@@ -23,13 +19,9 @@ exports.createProject = (projectBody, userId) => {
     imgLink: projectBody.imgLink,
     description: projectBody.description,
     userId: userId,
-  })
-    .then((project) => {
-      return project;
-    })
-    .catch((err) => {
-      return err;
-    });
+  }).then((project) => {
+    return project;
+  });
 };
 exports.updateProject = (projectBody, userId) => {
   return Project.update(
@@ -46,13 +38,9 @@ exports.updateProject = (projectBody, userId) => {
         id: projectBody.id,
       },
     }
-  )
-    .then((project) => {
-      return project;
-    })
-    .catch((err) => {
-      return err;
-    });
+  ).then((project) => {
+    return project;
+  });
 };
 
 exports.deleteProject = (userId, id) => {
@@ -61,7 +49,5 @@ exports.deleteProject = (userId, id) => {
       userId: userId,
       id: id,
     },
-  }).catch((err) => {
-    return err;
   });
 };

@@ -8,13 +8,9 @@ exports.createProfileImage = (file, userId) => {
     name: file.originalname,
     data: fs.readFileSync(__dirname + "/../static/uploads/" + file.filename),
     userId: userId,
-  })
-    .then((image) => {
-      return image;
-    })
-    .catch((err) => {
-      throw new Error(err);
-    });
+  }).then((image) => {
+    return image;
+  });
 };
 
 exports.updateProfileImage = (file, userId) => {
@@ -29,13 +25,9 @@ exports.updateProfileImage = (file, userId) => {
         userId: userId,
       },
     }
-  )
-    .then((image) => {
-      return image;
-    })
-    .catch((err) => {
-      throw new Error(err);
-    });
+  ).then((image) => {
+    return image;
+  });
 };
 
 exports.getProfileImage = (userId) => {
@@ -43,11 +35,7 @@ exports.getProfileImage = (userId) => {
     where: {
       userId: userId,
     },
-  })
-    .then((image) => {
-      return image;
-    })
-    .catch((err) => {
-      return err;
-    });
+  }).then((image) => {
+    return image;
+  });
 };
