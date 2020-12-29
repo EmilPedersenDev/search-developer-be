@@ -1,21 +1,30 @@
 const db = require("../models");
 const Experience = db.experience;
 
-exports.updateExperience = async (experienceRequest, userId) => {
-  return Experience.update(experienceRequest, {
-    where: {
-      userId: userId,
+exports.updateExperience = (experienceBody, userId) => {
+  return Experience.update(
+    {
+      company: experienceBody.company,
+      title: experienceBody.title,
+      date: experienceBody.date,
+      description: experienceBody.description,
     },
-  })
-    .then((links) => {
-      return links;
+    {
+      where: {
+        userId: userId,
+        id: experienceBody.id,
+      },
+    }
+  )
+    .then((experience) => {
+      return experience;
     })
     .catch((err) => {
       return err;
     });
 };
 
-exports.creatExperience = async (experienceBody, userId) => {
+exports.creatExperience = (experienceBody, userId) => {
   return Experience.create({
     company: experienceBody.company,
     title: experienceBody.title,
@@ -31,7 +40,7 @@ exports.creatExperience = async (experienceBody, userId) => {
     });
 };
 
-exports.deleteExperience = async (userId, id) => {
+exports.deleteExperience = (userId, id) => {
   return Experience.destroy({
     where: {
       userId: userId,
@@ -41,7 +50,7 @@ exports.deleteExperience = async (userId, id) => {
     return err;
   });
 };
-exports.getExperiences = async (userId) => {
+exports.getExperiences = (userId) => {
   return Experience.findAll({
     where: {
       userId: userId,

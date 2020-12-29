@@ -1,7 +1,7 @@
 const db = require("../models");
 const Project = db.project;
 
-exports.getProject = async (userId) => {
+exports.getProject = (userId) => {
   return Project.findAll({
     where: {
       userId: userId,
@@ -15,23 +15,47 @@ exports.getProject = async (userId) => {
     });
 };
 
-exports.createProject = async (projectBody, userId) => {
+exports.createProject = (projectBody, userId) => {
   return Project.create({
     name: projectBody.name,
     link: projectBody.link,
     repoLink: projectBody.repoLink,
+    imgLink: projectBody.imgLink,
     description: projectBody.description,
     userId: userId,
   })
-    .then((result) => {
-      return result;
+    .then((project) => {
+      return project;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+exports.updateProject = (projectBody, userId) => {
+  return Project.update(
+    {
+      name: projectBody.name,
+      link: projectBody.link,
+      repoLink: projectBody.repoLink,
+      imgLink: projectBody.imgLink,
+      description: projectBody.description,
+    },
+    {
+      where: {
+        userId: userId,
+        id: projectBody.id,
+      },
+    }
+  )
+    .then((project) => {
+      return project;
     })
     .catch((err) => {
       return err;
     });
 };
 
-exports.deleteProject = async (userId, id) => {
+exports.deleteProject = (userId, id) => {
   return Project.destroy({
     where: {
       userId: userId,
