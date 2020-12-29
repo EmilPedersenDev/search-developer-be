@@ -48,6 +48,6 @@ exports.getProfileImage = (userId) => {
       return image;
     })
     .catch((err) => {
-      throw new Error(err);
+      return err;
     });
 };

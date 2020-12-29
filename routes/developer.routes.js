@@ -23,10 +23,12 @@ const {
   creatExperience,
   deleteExperience,
   getExperiences,
+  updateExperience,
 } = require("../controllers/experience.controller");
 
 const {
   createProject,
+  updateProject,
   deleteProject,
   getProject,
 } = require("../controllers/project.controller");
@@ -80,7 +82,14 @@ module.exports = function (app) {
         {
           model: Project,
           as: "projects",
-          attributes: ["id", "name", "link", "repoLink", "description"],
+          attributes: [
+            "id",
+            "name",
+            "link",
+            "repoLink",
+            "imgLink",
+            "description",
+          ],
         },
         {
           model: Experience,
@@ -191,6 +200,35 @@ module.exports = function (app) {
     }
   );
 
+  app.put(
+    `/api/developer/:id/experience`,
+    experienceEditValidation(),
+    validate,
+    [authJwt.verifyToken],
+    (req, res) => {
+      const { id } = req.params;
+
+      updateExperience(req.body, id)
+        .then(() => {
+          getExperiences(id)
+            .then((experiences) => {
+              if (experiences.length < 1) {
+                notFoundHandler("No experiences found");
+              }
+              res.status(200).send({
+                experiences,
+              });
+            })
+            .catch((err) => {
+              errorHandler(err);
+            });
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
+    }
+  );
+
   app.delete(
     `/api/developer/:userId/experience/:id`,
     [authJwt.verifyToken],
@@ -227,6 +265,38 @@ module.exports = function (app) {
         .then(() => {
           getProject(id)
             .then((project) => {
+              if (!project) {
+                notFoundHandler("No Projects found");
+              }
+              res.status(200).send({
+                project,
+              });
+            })
+            .catch((err) => {
+              errorHandler(err);
+            });
+        })
+        .catch((err) => {
+          errorHandler(err);
+        });
+    }
+  );
+
+  app.put(
+    `/api/developer/:id/project`,
+    projectEditvalidation(),
+    validate,
+    [authJwt.verifyToken],
+    (req, res) => {
+      const { id } = req.params;
+
+      updateProject(req.body, id)
+        .then(() => {
+          getProject(id)
+            .then((project) => {
+              if (!project) {
+                notFoundHandler("No Projects found");
+              }
               res.status(200).send({
                 project,
               });
@@ -318,6 +388,9 @@ module.exports = function (app) {
     (req, res) => {
       getProfileImage(req.params.id)
         .then((image) => {
+          if (!image) {
+            notFoundHandler("Image not found");
+          }
           let imageToBase64 = image.data.toString("base64");
           res.send({
             type: image.type,

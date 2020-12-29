@@ -5,6 +5,7 @@ const {
   userSignupValidation,
 } = require("../middleware");
 const { setToken } = require("../controllers/auth.controller");
+let bcrypt = require("bcryptjs");
 
 const db = require("../models");
 const User = db.user;
