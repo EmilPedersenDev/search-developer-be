@@ -6,6 +6,31 @@ const SocialLink = db.socialLink;
 const Op = db.Sequelize.Op;
 const { addSkill } = require("../controllers/skill.controller");
 const { Sequelize } = require("../models");
+const {
+  validate,
+  userNameValidation,
+  userEmailValidation,
+  userPasswordValidation,
+  authJwt,
+} = require("../middleware/");
+const {
+  updateUserName,
+  getUser,
+  updateUserEmail,
+  updatePassword,
+} = require("../controllers/user.controller");
+
+const notFoundHandler = (res, err) => {
+  res.status(404).send({
+    message: err,
+  });
+};
+
+const errorHandler = (res, err) => {
+  res.status(500).send({
+    message: err,
+  });
+};
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -15,33 +40,6 @@ module.exports = function (app) {
     );
     next();
   });
-
-  // app.get("/api/users", (req, res) => {
-  //   User.findAll({
-  //     attributes: { exclude: ["password"] },
-  //     include: [
-  //       {
-  //         model: Skill,
-  //         as: "skills",
-  //       },
-  //     ],
-  //   })
-  //     .then((users) => {
-  //       if (!users) {
-  //         return res.status(404).send({
-  //           message: "User not found",
-  //         });
-  //       }
-  //       return res.status(200).send({
-  //         users,
-  //       });
-  //     })
-  //     .catch((err) => {
-  //       return res.status(500).send({
-  //         message: err,
-  //       });
-  //     });
-  // });
 
   app.get("/api/user/:id", (req, res) => {
     User.findByPk(req.params.id, {
@@ -61,18 +59,14 @@ module.exports = function (app) {
     })
       .then((user) => {
         if (!user) {
-          return res.status(404).send({
-            message: "User not found",
-          });
+          return notFoundHandler(res, "User not found");
         }
         res.status(200).send({
           user,
         });
       })
       .catch((err) => {
-        return res.status(500).send({
-          message: err.message,
-        });
+        errorHandler(res, err);
       });
   });
 
@@ -111,9 +105,7 @@ module.exports = function (app) {
     })
       .then((users) => {
         if (users.length < 1) {
-          return res.status(404).send({
-            message: "No users found!",
-          });
+          return notFoundHandler(res, "User not found");
         }
 
         return res.status(200).send({
@@ -121,47 +113,94 @@ module.exports = function (app) {
         });
       })
       .catch((err) => {
-        console.log(err);
-        return res.status(500).send({
-          message: err,
-        });
+        errorHandler(res, err);
       });
   });
 
-  app.put("/api/user/:id/personal-information", (req, res) => {
-    User.findByPk(req.params.id, {
-      attributes: { exclude: ["password", "createdAt", "updatedAt"] },
-      include: [
-        {
-          model: Skill,
-          as: "skills",
-          attributes: ["id", "name"],
-        },
-      ],
-    })
-      .then((user) => {
-        user
-          .update({
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            information: req.body.information,
-          })
-          .then((user) => {
-            if (!user) {
-              return res.status(404).send({
-                message: "No user found!",
+  app.put(
+    "/api/user/:id/name",
+    userNameValidation(),
+    validate,
+    [authJwt.verifyToken],
+    (req, res) => {
+      const { id } = req.params;
+
+      updateUserName(req.body, id)
+        .then(() => {
+          getUser(id)
+            .then((user) => {
+              if (!user) {
+                notFoundHandler(res, "User not found");
+              }
+              res.status(200).send({
+                user,
               });
-            }
-
-            res.status(200).send({
-              user,
+            })
+            .catch((err) => {
+              errorHandler(res, err);
             });
-          });
-      })
-      .catch((e) => {
-        res.status(500).send({
-          message: e,
+        })
+        .catch((err) => {
+          errorHandler(res, err);
         });
-      });
-  });
+    }
+  );
+
+  app.put(
+    "/api/user/:id/email",
+    userEmailValidation(),
+    validate,
+    [authJwt.verifyToken],
+    (req, res) => {
+      const { id } = req.params;
+
+      updateUserEmail(req.body, id)
+        .then(() => {
+          getUser(id)
+            .then((user) => {
+              if (!user) {
+                return notFoundHandler(res, "User not found");
+              }
+              res.status(200).send({
+                user,
+              });
+            })
+            .catch((err) => {
+              errorHandler(res, err);
+            });
+        })
+        .catch((err) => {
+          errorHandler(res, err);
+        });
+    }
+  );
+
+  app.put(
+    "/api/user/:id/password",
+    userPasswordValidation(),
+    validate,
+    [authJwt.verifyToken],
+    (req, res) => {
+      const { id } = req.params;
+
+      updatePassword(req.body, id)
+        .then(() => {
+          getUser(id)
+            .then((user) => {
+              if (!user) {
+                return notFoundHandler(res, "User not found");
+              }
+              res.status(200).send({
+                message: "Password Updated",
+              });
+            })
+            .catch((err) => {
+              errorHandler(res, err);
+            });
+        })
+        .catch((err) => {
+          errorHandler(res, err);
+        });
+    }
+  );
 };

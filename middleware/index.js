@@ -8,6 +8,9 @@ const {
   skillsValidation,
   experienceEditValidation,
   projectEditvalidation,
+  userNameValidation,
+  userEmailValidation,
+  userPasswordValidation,
 } = require("./validator-rules");
 const uploadFile = require("./upload");
 
@@ -21,5 +24,8 @@ module.exports = {
   skillsValidation,
   experienceEditValidation,
   projectEditvalidation,
+  userNameValidation,
+  userEmailValidation,
+  userPasswordValidation,
   uploadFile,
 };

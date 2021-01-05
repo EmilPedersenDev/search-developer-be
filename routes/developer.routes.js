@@ -100,7 +100,7 @@ module.exports = function (app) {
     })
       .then((developer) => {
         if (!developer) {
-          notFoundHandler(res, "Developer not found");
+          return notFoundHandler(res, "Developer not found");
         }
         res.status(200).send({
           developer,
@@ -120,7 +120,7 @@ module.exports = function (app) {
       const { id } = req.params;
       getUserWithLinks(id).then((user) => {
         if (!user) {
-          notFoundHandler(res, "User not found!");
+          return notFoundHandler(res, "User not found!");
         }
 
         let promises = [];

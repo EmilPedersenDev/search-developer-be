@@ -10,6 +10,18 @@ let bcrypt = require("bcryptjs");
 const db = require("../models");
 const User = db.user;
 
+const notFoundHandler = (res, err) => {
+  res.status(404).send({
+    message: err,
+  });
+};
+
+const errorHandler = (res, err) => {
+  res.status(500).send({
+    message: err,
+  });
+};
+
 module.exports = function (app) {
   app.use(function (req, res, next) {
     res.header(
@@ -37,9 +49,7 @@ module.exports = function (app) {
           });
         })
         .catch((err) => {
-          res.status(500).send({
-            message: err.message,
-          });
+          errorHandler(res, err);
         });
     }
   );
@@ -52,9 +62,7 @@ module.exports = function (app) {
     })
       .then((user) => {
         if (!user) {
-          return res.status(404).send({
-            message: "User not found.",
-          });
+          return notFoundHandler(res, "User not found.");
         }
         let token = setToken(req.body, user);
 
@@ -67,9 +75,7 @@ module.exports = function (app) {
         });
       })
       .catch((err) => {
-        res.status(500).send({
-          message: err.message,
-        });
+        errorHandler(res, err);
       });
   });
 };

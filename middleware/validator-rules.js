@@ -76,6 +76,32 @@ const skillsValidation = () => {
   return [query("query").not().isEmpty()];
 };
 
+const userNameValidation = () => {
+  return [
+    body("firstname")
+      .not()
+      .isEmpty()
+      .trim()
+      .withMessage("Firstname cannot be empty"),
+    body("lastname")
+      .not()
+      .isEmpty()
+      .trim()
+      .withMessage("Lastname cannot be empty"),
+  ];
+};
+
+const userEmailValidation = () => {
+  return [body("email").isEmail().withMessage("Not a valid email")];
+};
+const userPasswordValidation = () => {
+  return [
+    body("password")
+      .isLength({ min: 8 })
+      .withMessage("Password needs to contain at least 8 digits"),
+  ];
+};
+
 module.exports = {
   userSigninValidation,
   userSignupValidation,
@@ -83,4 +109,7 @@ module.exports = {
   skillsValidation,
   experienceEditValidation,
   projectEditvalidation,
+  userNameValidation,
+  userEmailValidation,
+  userPasswordValidation,
 };

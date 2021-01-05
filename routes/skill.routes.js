@@ -3,13 +3,13 @@ const Skill = db.skill;
 const Op = db.Sequelize.Op;
 const { validate, skillsValidation } = require("../middleware/");
 
-const notFoundHandler = (err) => {
+const notFoundHandler = (res, err) => {
   res.status(404).send({
     message: err,
   });
 };
 
-const errorHandler = (err) => {
+const errorHandler = (res, err) => {
   res.status(500).send({
     message: err,
   });
@@ -28,14 +28,14 @@ module.exports = function (app) {
     Skill.findAll()
       .then((skills) => {
         if (!skills) {
-          notFoundHandler("Could not find any skills!");
+          return notFoundHandler(res, "Could not find any skills!");
         }
         return res.status(200).send({
           skills,
         });
       })
       .catch((e) => {
-        errorHandler(e);
+        errorHandler(res, e);
       });
   });
 
@@ -48,8 +48,8 @@ module.exports = function (app) {
       },
     })
       .then((skills) => {
-        if (!skills) {
-          notFoundHandler("Skill not found!");
+        if (skills.length < 1) {
+          return notFoundHandler(res, "Skill not found!");
         }
 
         res.status(200).send({
@@ -57,7 +57,7 @@ module.exports = function (app) {
         });
       })
       .catch((e) => {
-        errorHandler(e);
+        errorHandler(res, e);
       });
   });
 };
