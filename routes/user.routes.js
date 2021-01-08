@@ -72,7 +72,7 @@ module.exports = function (app) {
 
   app.get("/api/users", (req, res) => {
     User.findAll({
-      limit: 10,
+      limit: 5,
       subQuery: false,
       where: {
         [Op.or]: [

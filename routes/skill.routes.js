@@ -41,7 +41,7 @@ module.exports = function (app) {
 
   app.get("/api/skills/search", skillsValidation(), validate, (req, res) => {
     Skill.findAll({
-      limit: 10,
+      limit: 5,
       attributes: { exclude: ["createdAt", "updatedAt"] },
       where: {
         name: { [Op.like]: "%" + req.query.query + "%" },
