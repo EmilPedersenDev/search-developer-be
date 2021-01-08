@@ -358,7 +358,7 @@ module.exports = function (app) {
 
           Promise.all(promises)
             .then(() => {
-              getProfileImage(profileImage.userId)
+              getProfileImage(req.params.id)
                 .then((file) => {
                   if (!file) {
                     return notFoundHandler(res, "Image not found");
