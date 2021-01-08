@@ -9,9 +9,6 @@ module.exports = (sequelize, Sequelize) => {
     repoLink: {
       type: Sequelize.STRING(2083),
     },
-    imgLink: {
-      type: Sequelize.STRING(2083),
-    },
     description: {
       type: Sequelize.STRING,
     },

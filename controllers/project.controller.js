@@ -16,7 +16,6 @@ exports.createProject = (projectBody, userId) => {
     name: projectBody.name,
     link: projectBody.link,
     repoLink: projectBody.repoLink,
-    imgLink: projectBody.imgLink,
     description: projectBody.description,
     userId: userId,
   }).then((project) => {
@@ -29,7 +28,6 @@ exports.updateProject = (projectBody, userId) => {
       name: projectBody.name,
       link: projectBody.link,
       repoLink: projectBody.repoLink,
-      imgLink: projectBody.imgLink,
       description: projectBody.description,
     },
     {

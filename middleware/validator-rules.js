@@ -35,11 +35,6 @@ const developerEditValidation = () => {
       .isEmpty()
       .trim()
       .withMessage("Lastname cannot be empty"),
-    body("information")
-      .not()
-      .isEmpty()
-      .trim()
-      .withMessage("Information cannot be empty"),
   ];
 };
 
@@ -59,11 +54,11 @@ const projectEditvalidation = () => {
   return [
     body("name").not().isEmpty().trim().withMessage("Name cannot be empty"),
     body("link").not().isEmpty().trim().withMessage("Link cannot be empty"),
-    body("imgLink")
+    body("repoLink")
       .not()
       .isEmpty()
       .trim()
-      .withMessage("Image link cannot be empty"),
+      .withMessage("Repo link cannot be empty"),
     body("description")
       .not()
       .isEmpty()

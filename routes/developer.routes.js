@@ -82,14 +82,7 @@ module.exports = function (app) {
         {
           model: Project,
           as: "projects",
-          attributes: [
-            "id",
-            "name",
-            "link",
-            "repoLink",
-            "imgLink",
-            "description",
-          ],
+          attributes: ["id", "name", "link", "repoLink", "description"],
         },
         {
           model: Experience,

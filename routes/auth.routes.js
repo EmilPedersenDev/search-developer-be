@@ -64,7 +64,7 @@ module.exports = function (app) {
         if (!user) {
           return notFoundHandler(res, "User not found.");
         }
-        let token = setToken(req.body, user);
+        let token = setToken(res, req.body, user);
 
         res.status(200).send({
           id: user.id,

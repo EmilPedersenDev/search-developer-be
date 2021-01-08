@@ -2,7 +2,7 @@ const config = require("../config/auth.config");
 let jwt = require("jsonwebtoken");
 let bcrypt = require("bcryptjs");
 
-exports.setToken = (reqBody, user) => {
+exports.setToken = (res, reqBody, user) => {
   let passwordIsValid = bcrypt.compareSync(reqBody.password, user.password);
 
   if (!passwordIsValid) {
