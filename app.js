@@ -7,15 +7,6 @@ const data = require("./config/skills.config");
 
 const app = express();
 
-// const corsConfig =
-//   process.env.NODE_ENV !== "production"
-//     ? "http://localhost:8080"
-//     : "https://emilpedersendev.github.io/search-developer-fe";
-
-// const corsOptions = {
-//   origin: corsConfig,
-// };
-
 app.use(cors());
 
 app.use(bodyParser.json());
