@@ -90,6 +90,7 @@ module.exports = function (app) {
           attributes: ["id", "company", "title", "date", "description"],
         },
       ],
+      order: [[Experience, "date", "DESC"]],
     })
       .then((developer) => {
         if (!developer) {

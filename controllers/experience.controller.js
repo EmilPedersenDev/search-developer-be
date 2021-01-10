@@ -55,6 +55,7 @@ exports.getExperiences = (userId) => {
     where: {
       userId: userId,
     },
+    order: [["date", "DESC"]],
   })
     .then((experience) => {
       return experience;
