@@ -1,3 +1,3 @@
 module.exports = {
-  secret: "search-developer-secret-key",
+  secret: process.env.SECRET,
 };
