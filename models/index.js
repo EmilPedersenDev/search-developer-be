@@ -1,7 +1,14 @@
 const config = require("../config/db.config");
 
 const Sequelize = require("sequelize");
-console.log(config.DB, config.USER, config.PASSWORD, config.HOST, process.env);
+console.log(
+  "WHERE ISHEEEEEEEEEEE????!!!!!",
+  config.DB,
+  config.USER,
+  config.PASSWORD,
+  config.HOST,
+  process.env
+);
 const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   host: config.HOST,
   dialect: config.dialect,
