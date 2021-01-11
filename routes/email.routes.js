@@ -1,4 +1,5 @@
 const { sendEmail } = require("../controllers/email.controller");
+const { validate, sendEmailValidation } = require("../middleware/");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -9,17 +10,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.post("/api/email", (req, res) => {
-    sendEmail()
-      .then((result) => {
-        res.status(200).send({
-          message: result,
-        });
-      })
-      .catch((err) => {
-        res.status(500).send({
-          message: err,
-        });
-      });
+  app.post("/api/email", sendEmailValidation(), validate, (req, res) => {
+    sendEmail(res, req.body);
   });
 };

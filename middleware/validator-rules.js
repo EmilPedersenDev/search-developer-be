@@ -97,6 +97,27 @@ const userPasswordValidation = () => {
   ];
 };
 
+const sendEmailValidation = () => {
+  return [
+    body("firstname")
+      .not()
+      .isEmpty()
+      .trim()
+      .withMessage("Firstname cannot be empty"),
+    body("lastname")
+      .not()
+      .isEmpty()
+      .trim()
+      .withMessage("Lastname cannot be empty"),
+    body("email").isEmail().withMessage("Not a valid email"),
+    body("message")
+      .not()
+      .isEmpty()
+      .trim()
+      .withMessage("Lastname cannot be empty"),
+  ];
+};
+
 module.exports = {
   userSigninValidation,
   userSignupValidation,
@@ -107,4 +128,5 @@ module.exports = {
   userNameValidation,
   userEmailValidation,
   userPasswordValidation,
+  sendEmailValidation,
 };

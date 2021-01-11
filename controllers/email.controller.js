@@ -1,40 +1,50 @@
 const nodemailer = require("nodemailer");
+const ejs = require("ejs");
 
-let sendEmailPromise = (transporter, message) => {
-  return new Promise((res, rej) => {
-    transporter.sendMail(message, (err, info) => {
-      if (err) {
-        rej(err);
-      } else {
-        res(info);
-      }
-    });
-  });
-};
-
-exports.sendEmail = (/* options */) => {
+exports.sendEmail = (res, options) => {
   let transporter = nodemailer.createTransport({
-    host: "smtp.mailtrap.io",
-    port: 2525,
+    host: process.env.EMAIL_HOST,
+    port: 465,
+    secure: true,
     auth: {
-      user: "ecba7517b052f7",
-      pass: "48573cf1b2115a",
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
     },
   });
 
-  let messsage = {
-    from: "nissetest@mailinator.com", // sender address
-    to: "emiltesting1@mailinator.com", // list of receivers
-    subject: "Hello ✔", // Subject line
-    text: "Hello world?", // plain text body
-    html: "<b>Hello world?</b>", // html body
-  };
+  let senderName = options.firstname + " " + options.lastname;
 
-  return sendEmailPromise(transporter, messsage)
-    .then((result) => {
-      return result;
-    })
-    .catch((err) => {
-      return err;
-    });
+  ejs.renderFile(
+    __dirname + "/../emailTemplate" + "/email.ejs",
+    {
+      name: options.developer,
+      senderName: senderName,
+      message: options.message,
+      senderEmail: options.email,
+    },
+    function (err, data) {
+      console.log(__dirname);
+      if (err) {
+        console.error(err);
+      } else {
+        let mainOptions = {
+          to: options.developerEmail,
+          subject: `You have a message from ${senderName}`,
+          html: data,
+        };
+
+        transporter.sendMail(mainOptions, (err, info) => {
+          if (err) {
+            res.status(500).send({
+              message: err,
+            });
+          } else {
+            res.status(200).send({
+              message: info,
+            });
+          }
+        });
+      }
+    }
+  );
 };

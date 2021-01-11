@@ -11,6 +11,7 @@ const {
   userNameValidation,
   userEmailValidation,
   userPasswordValidation,
+  sendEmailValidation,
 } = require("./validator-rules");
 const uploadFile = require("./upload");
 
@@ -27,5 +28,6 @@ module.exports = {
   userNameValidation,
   userEmailValidation,
   userPasswordValidation,
+  sendEmailValidation,
   uploadFile,
 };

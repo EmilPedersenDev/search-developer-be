@@ -67,7 +67,7 @@ module.exports = function (app) {
 
   app.get("/api/developer/:id", (req, res) => {
     User.findByPk(req.params.id, {
-      attributes: { exclude: ["password", "createdAt", "updatedAt", "email"] },
+      attributes: { exclude: ["password", "createdAt", "updatedAt"] },
       include: [
         {
           model: Skill,
