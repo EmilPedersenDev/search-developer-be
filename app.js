@@ -38,6 +38,7 @@ require("./routes/auth.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/skill.routes")(app);
 require("./routes/developer.routes")(app);
+require("./routes/email.routes")(app);
 
 const port = process.env.PORT || 8081;
 
