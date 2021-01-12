@@ -105,7 +105,7 @@ module.exports = function (app) {
     })
       .then((users) => {
         if (users.length < 1) {
-          return notFoundHandler(res, "User not found");
+          return notFoundHandler(res, "User not found...");
         }
 
         return res.status(200).send({
