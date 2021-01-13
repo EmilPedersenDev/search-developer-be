@@ -14,12 +14,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 db.sequelize
-  .sync({ force: true })
+  .sync({ alter: true })
   .then(() => {
     console.log("Connection to db succesfull...");
-    Skill.bulkCreate(data)
-      .then(() => {
-        console.log("Skills updated");
+    Skill.findAll()
+      .then((skills) => {
+        if (skills.length < 1) {
+          Skill.bulkCreate(data)
+            .then(() => {
+              console.log("Skills updated");
+            })
+            .catch((e) => {
+              console.error(e);
+            });
+        }
       })
       .catch((e) => {
         console.error(e);

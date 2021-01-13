@@ -1,13 +1,18 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
   const Image = sequelize.define("profileImage", {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     type: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
     },
     name: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
     },
     data: {
-      type: DataTypes.BLOB("long"),
+      type: Sequelize.BLOB("long"),
     },
   });
 
